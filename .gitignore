@@ -1,0 +1,119 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# =========================
+# Virtual environments
+# =========================
+.venv/
+venv/
+env/
+ENV/
+
+# uv-specific (safe to ignore venv, keep lockfile)
+.uv/
+.python-version
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# Logs & runtime artifacts
+# =========================
+*.log
+logs/
+tmp/
+temp/
+
+# Agent-specific runtime
+runs/
+sessions/
+checkpoints/
+cache/
+
+# =========================
+# Environment & secrets
+# =========================
+.env
+.env.*
+*.env
+
+# API keys / credentials
+secrets/
+*.pem
+*.key
+*.crt
+
+# =========================
+# Testing
+# =========================
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# =========================
+# Type checkers
+# =========================
+.mypy_cache/
+.pyre/
+.pytype/
+
+# =========================
+# Jupyter
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Build tools / misc
+# =========================
+*.manifest
+*.spec
+
+# =========================
+# Local dev databases
+# =========================
+*.sqlite3
+*.db
+
+# =========================
+# Node (if frontend exists)
+# =========================
+node_modules/
+dist-frontend/
+
+# =========================
+# ActGuard / Agent-specific
+# =========================
+# local receipts, budgets, traces
+*.trace.json
+*.receipt.json
+*.event.json
+
+# debugging dumps
+debug/

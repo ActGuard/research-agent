@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "timestamp_skew_seconds": 300,
+  "nonce_ttl_seconds": 600,
+  "secret_env": "A2A_HMAC_SECRET",
+  "key_id": "default",
+  "allowed_method": "message/send"
+}

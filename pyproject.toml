@@ -1,0 +1,22 @@
+[project]
+name = "research-agent"
+version = "0.1.0"
+description = "A research agent exposed over the A2A protocol"
+requires-python = ">=3.12"
+dependencies = [
+    "a2a-sdk[http-server]",
+    "openai",
+    "tavily-python",
+    "langchain-openai",
+    "langgraph",
+    "httpx",
+    "crawl4ai",
+    "pydantic-settings",
+    "python-dotenv",
+    "click",
+    "uvicorn",
+    "actguard>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio"]
