@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import sys
+
 import hashlib
 import hmac
 import json
@@ -21,6 +23,11 @@ load_dotenv(CONFIG_PATH.parent.parent / ".env")
 
 
 def main() -> None:
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <question>")
+        sys.exit(1)
+    question = " ".join(sys.argv[1:])
+
     config = json.loads(CONFIG_PATH.read_text())
     secret = os.environ[config["secret_env"]].encode()
 
@@ -32,7 +39,7 @@ def main() -> None:
             "params": {
                 "message": {
                     "role": "user",
-                    "parts": [{"kind": "text", "text": "Tell me everything you know about accionlabs.com. Where are they from? Are they recruiting company? Why did their recruiter contact me?"}],
+                    "parts": [{"kind": "text", "text": question}],
                     "messageId": str(uuid.uuid4()),
                 }
             },

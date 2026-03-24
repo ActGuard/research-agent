@@ -2,7 +2,9 @@
 
 A simple, budget-controlled research agent that searches the web, scrapes and compresses sources, and generates markdown reports -- without running out of control.
 
-**~50 research questions for $1.** Perfect for quick lookups where you need a fast answer to know where to dig deeper: which foods are on a specific diet, initial research on AI agent architectures, comparing tool options, etc.
+**~70 research questions for $1.** Perfect for quick lookups where you need a fast answer to know where to dig deeper: which foods are on a specific diet, initial research on AI agent architectures, comparing tool options, etc. 
+
+![til](./docs/rdemo.gif)
 
 ## What this repo demonstrates
 
@@ -35,10 +37,10 @@ generate report     -- single LLM call to produce markdown report
 
 Each step is a plain async function -- no graph framework, no multi-agent orchestration. The entire pipeline is ~165 lines of code.
 
-## ActGuard -- Budget Control
+## ActGuard - Budget Control
 
 <!-- TODO: replace with an actual screenshot of the ActGuard dashboard -->
-![ActGuard Dashboard](docs/actguard-research-cost.png)
+![ActGuard Dashboard](docs/actguard-cost-breakdown.png)
 
 [ActGuard](https://actguard.ai) is integrated as a budget control and cost tracking layer. Every expensive operation in the pipeline -- LLM calls, web searches, and page scrapes -- is wrapped in an ActGuard budget guard. This prevents runaway API costs during research.
 
