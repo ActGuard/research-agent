@@ -109,7 +109,7 @@ research-agent/
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/<your-org>/research-agent.git
+git clone https://github.com/ActGuard/research-agent.git
 cd research-agent
 
 # 2. Copy the env template and fill in your API keys
