@@ -1,6 +1,21 @@
-# Research Agent
+# Research Agent with Runtime Guardrails
 
-An AI-powered deep research agent that accepts a query and produces a comprehensive, well-sourced markdown report. Inspired by [gpt-researcher](https://github.com/assafelovic/gpt-researcher), it uses a supervisor-researcher architecture built on [LangGraph](https://langchain-ai.github.io/langgraph/) and exposes its capabilities over the [Agent-to-Agent (A2A) protocol](https://google.github.io/A2A/) so any A2A-compatible client can invoke it.
+A multi-step research agent built with LangGraph that can:
+- plan research tasks 
+- search the web
+- extract structured evidence
+- generate reports 
+
+** But unlike most agents — it doesn’t run out of control. **
+
+## What this repo demonstrates
+
+This is a controlled research agent with:
+- 💸 Budget enforcement (~$0.05–$0.10 per run) 
+- 🔁 Multi-step reasoning (LangGraph)
+- 📊 Cost + usage tracking
+
+Inspired by [gpt-researcher](https://github.com/assafelovic/gpt-researcher), it uses a supervisor-researcher architecture built on [LangGraph](https://langchain-ai.github.io/langgraph/) and exposes its capabilities over the [Agent-to-Agent (A2A) protocol](https://google.github.io/A2A/) so any A2A-compatible client can invoke it.
 
 ## Architecture
 
