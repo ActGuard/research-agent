@@ -8,7 +8,7 @@ dependencies = [
     "openai",
     "tavily-python",
     "langchain-openai",
-    "langgraph",
+
     "httpx",
     "crawl4ai",
     "pydantic-settings",

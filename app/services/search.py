@@ -23,11 +23,12 @@ class SearchResult:
     url: str
     content: str
     score: float
+    raw_content: str = ""
 
 
 async def search(query: str, max_results: int | None = None) -> list[SearchResult]:
     max_results = max_results or settings.max_search_results
-    response = await _get_client().search(query=query, max_results=max_results)
+    response = await _get_client().search(query=query, max_results=max_results, include_raw_content=True)
     results = response.get("results", [])
     logger.info("search — query=%r results=%d", query, len(results))
     return [
@@ -36,6 +37,7 @@ async def search(query: str, max_results: int | None = None) -> list[SearchResul
             url=r.get("url", ""),
             content=r.get("content", ""),
             score=r.get("score", 0.0),
+            raw_content=r.get("raw_content", ""),
         )
         for r in results
     ]

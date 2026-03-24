@@ -13,6 +13,8 @@ from pathlib import Path
 
 import httpx
 from dotenv import load_dotenv
+from rich.console import Console
+from rich.markdown import Markdown
 
 CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "a2a_auth.json"
 load_dotenv(CONFIG_PATH.parent.parent / ".env")
@@ -30,7 +32,7 @@ def main() -> None:
             "params": {
                 "message": {
                     "role": "user",
-                    "parts": [{"kind": "text", "text": "Latest advances in quantum error correction"}],
+                    "parts": [{"kind": "text", "text": "Tell me everything you know about accionlabs.com. Where are they from? Are they recruiting company? Why did their recruiter contact me?"}],
                     "messageId": str(uuid.uuid4()),
                 }
             },
@@ -58,7 +60,29 @@ def main() -> None:
 
     resp = httpx.post(f"http://{host}{path}", content=payload, headers=headers, timeout=360)
     print(f"Status: {resp.status_code}")
-    print(resp.text)
+
+    console = Console()
+    try:
+        data = resp.json()
+        result = data.get("result", {})
+        # Collect text parts from artifacts or message
+        text_parts: list[str] = []
+        for artifact in result.get("artifacts", []):
+            for part in artifact.get("parts", []):
+                if part.get("kind") == "text":
+                    text_parts.append(part["text"])
+        if not text_parts:
+            message = result.get("message", {})
+            for part in message.get("parts", []):
+                if part.get("kind") == "text":
+                    text_parts.append(part["text"])
+        if text_parts:
+            for text in text_parts:
+                console.print(Markdown(text))
+        else:
+            print(resp.text)
+    except (json.JSONDecodeError, KeyError):
+        print(resp.text)
 
 
 if __name__ == "__main__":

@@ -9,33 +9,22 @@ class Settings(BaseSettings):
     tavily_api_key: str = ""
     host: str = "localhost"
     port: int = 10000
-    max_sub_queries: int = 4
     max_search_results: int = 5
+    max_scrape_urls: int = 5
+    max_context_chars: int = 50_000
     report_format: str = "markdown"
-    max_research_rounds: int = 2
-    max_sub_queries_quick: int = 1
-    max_sub_queries_standard: int = 4
-    max_sub_queries_deep: int = 6
-    max_evidence_per_source: int = 5
     a2a_hmac_secret: str = ""
     actguard_api_key: str = ""
     actguard_gateway_url: str = "https://api.actguard.ai"
 
-    max_worker_iterations: int = 2
-
-    # Supervisor / researcher settings
-    max_supervisor_iterations: int = 3
-    max_researcher_tool_calls: int = 10
-    max_concurrent_researchers: int = 3
-
-    # Per-step model overrides (None = use openai_model default)
-    model_classify: str | None = None
-    model_brief: str | None = None
-    model_supervisor: str | None = None
-    model_researcher: str | None = None
-    model_compress: str | None = None
+    # Model override for report generation (None = use openai_model)
     model_write_report: str | None = None
-    model_refine_report: str | None = None
+
+    # Embedding / chunk settings
+    embedding_model: str = "text-embedding-3-small"
+    chunk_size: int = 1000
+    chunk_overlap: int = 100
+    similarity_threshold: float = 0.75
 
 
 settings = Settings()

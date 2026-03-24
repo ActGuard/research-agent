@@ -7,7 +7,7 @@ from crawl4ai import DefaultMarkdownGenerator, PruningContentFilter
 logger = logging.getLogger(__name__)
 
 _TIMEOUT_MS = 15_000
-_MAX_TEXT = 12_000
+_MAX_TEXT = 100_000
 
 
 @dataclass

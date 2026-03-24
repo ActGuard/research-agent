@@ -1,55 +1,39 @@
 # Research Agent with Runtime Guardrails
 
-A multi-step research agent built with LangGraph that can:
-- plan research tasks 
-- search the web
-- extract structured evidence
-- generate reports 
+A simple, budget-controlled research agent that searches the web, scrapes and compresses sources, and generates markdown reports -- without running out of control.
 
-** But unlike most agents — it doesn’t run out of control. **
+**~50 research questions for $1.** Perfect for quick lookups where you need a fast answer to know where to dig deeper: which foods are on a specific diet, initial research on AI agent architectures, comparing tool options, etc.
 
 ## What this repo demonstrates
 
 This is a controlled research agent with:
-- 💸 Budget enforcement (~$0.05–$0.10 per run) 
-- 🔁 Multi-step reasoning (LangGraph)
+- 💸 Budget enforcement (~$0.02 per run)
+- 🔍 Web search + scraping + semantic compression
 - 📊 Cost + usage tracking
 
-Inspired by [gpt-researcher](https://github.com/assafelovic/gpt-researcher), it uses a supervisor-researcher architecture built on [LangGraph](https://langchain-ai.github.io/langgraph/) and exposes its capabilities over the [Agent-to-Agent (A2A) protocol](https://google.github.io/A2A/) so any A2A-compatible client can invoke it.
+Inspired by [gpt-researcher](https://github.com/assafelovic/gpt-researcher), it uses a simple linear pipeline and exposes its capabilities over the [Agent-to-Agent (A2A) protocol](https://google.github.io/A2A/) so any A2A-compatible client can invoke it.
 
 ## Architecture
 
-The agent runs a multi-stage [LangGraph](https://langchain-ai.github.io/langgraph/) pipeline with a two-tier supervisor-researcher design:
+The agent runs a four-step linear pipeline:
 
 ```
-START
+query
   |
   v
-classify_query          -- determine query type (quick / standard / deep / comparison)
+search              -- web search via Tavily
   |
   v
-create_research_brief   -- expand the query into a detailed research brief
+scrape + compress   -- fetch pages with Crawl4AI, compress via embeddings
   |
   v
-research_supervisor     -- supervisor subgraph that orchestrates parallel researchers
-  |   |
-  |   +-- researcher 1  (web_search, scrape_url) --> compress
-  |   +-- researcher 2  (web_search, scrape_url) --> compress
-  |   +-- researcher N  (web_search, scrape_url) --> compress
+assemble context    -- join compressed pages, truncate if needed
   |
   v
-write_report            -- synthesize all research notes into a markdown report
-  |
-  v
-[refine_report]         -- critical review & revision (skipped for quick queries)
-  |
-  v
-END
+generate report     -- single LLM call to produce markdown report
 ```
 
-**Supervisor** orchestrates the research by deciding which topics to investigate and delegating them to parallel researcher agents. It uses three tools: `think` (reflect on gaps), `ConductResearch` (launch researchers), and `ResearchComplete` (signal done).
-
-**Researchers** are independent ReAct agents that use `web_search` (Tavily) and `scrape_url` (Crawl4AI) tools to gather information. Their findings are compressed into concise notes and fed back to the supervisor.
+Each step is a plain async function -- no graph framework, no multi-agent orchestration. The entire pipeline is ~165 lines of code.
 
 ## ActGuard -- Budget Control
 
@@ -60,7 +44,7 @@ END
 
 How it works:
 - Each research run is started with a configurable cost limit (default: 500 units)
-- Individual operations are tracked under named guards (`classifier`, `supervisor`, `researcher_search`, `researcher_scrape`, `compress_research`, `write_report`, `refine_report`)
+- Individual operations are tracked under named guards (`search`, `scrape`, `write_report`)
 - If the budget is exceeded mid-run, ActGuard raises a `BudgetExceededError` and the agent returns a graceful error instead of continuing to spend
 
 To enable budget tracking, visit [actguard.ai](https://actguard.ai), create a free account, and add your `ACTGUARD_API_KEY` to `.env`. If unset, budget tracking is disabled.
@@ -69,12 +53,12 @@ To enable budget tracking, visit [actguard.ai](https://actguard.ai), create a fr
 
 | Library | Purpose |
 |---|---|
-| [Tavily](https://tavily.com/) | Web search API optimized for AI agents. Powers the `web_search` tool used by researchers. |
-| [Crawl4AI](https://github.com/unclecode/crawl4ai) | Async web scraper with headless browser and markdown extraction. Powers the `scrape_url` tool. |
-| [LangGraph](https://langchain-ai.github.io/langgraph/) | Graph-based agent orchestration. Defines the entire research pipeline and subgraphs. |
+| [Tavily](https://tavily.com/) | Web search API optimized for AI agents. |
+| [Crawl4AI](https://github.com/unclecode/crawl4ai) | Async web scraper with headless browser and markdown extraction. |
+| [OpenAI Embeddings](https://platform.openai.com/docs/guides/embeddings) | Semantic compression -- keeps only the chunks relevant to the query. |
 | [ActGuard](https://actguard.ai) | Budget control and cost tracking for AI agent operations. |
 | [A2A SDK](https://google.github.io/A2A/) | Agent-to-Agent protocol. Exposes the agent as a JSON-RPC endpoint. |
-| [LangChain OpenAI](https://python.langchain.com/) | OpenAI integration for LLM calls with tool/function calling support. |
+| [LangChain OpenAI](https://python.langchain.com/) | OpenAI integration for LLM calls with structured output. |
 
 ## Project Structure
 
@@ -87,25 +71,23 @@ research-agent/
 │   ├── config.py                  # Settings (env vars + defaults)
 │   ├── a2a_auth.py                # HMAC authentication middleware
 │   ├── researcher/
-│   │   ├── graph.py               # LangGraph pipeline wiring
-│   │   ├── nodes.py               # Node implementations (classify, brief, report)
+│   │   ├── graph.py               # Research pipeline (search → scrape → compress → report)
 │   │   ├── prompts.py             # LLM prompt templates
-│   │   ├── tools.py               # Tool definitions (supervisor & researcher)
 │   │   ├── schemas.py             # Pydantic output models
-│   │   ├── state.py               # Graph state schemas
 │   │   ├── errors.py              # Custom exceptions
 │   │   └── actguard_client.py     # ActGuard client initialization
 │   └── services/
 │       ├── llm.py                 # OpenAI async client
 │       ├── search.py              # Tavily search client
-│       └── scraper.py             # Crawl4AI web scraper
+│       ├── scraper.py             # Crawl4AI web scraper
+│       └── embeddings.py          # Semantic compression via embeddings
 ├── scripts/
 │   └── sign_request.py            # Send HMAC-signed A2A requests (testing helper)
 ├── config/
 │   └── a2a_auth.json              # A2A authentication config
 ├── tests/
 │   ├── test_client.py             # Integration tests (A2A endpoints)
-│   └── test_graph.py              # Unit tests (graph execution)
+│   └── test_graph.py              # Unit tests (pipeline execution)
 ├── .env.example
 ├── .gitignore
 ├── pyproject.toml
@@ -153,25 +135,22 @@ curl http://localhost:10000/.well-known/agent.json
 | `ACTGUARD_API_KEY` | `""` | ActGuard API key for cost tracking. Create a free account at [actguard.ai](https://actguard.ai). Optional -- budget tracking is disabled if unset |
 | `HOST` | `localhost` | Server bind address |
 | `PORT` | `10000` | Server port |
-| `OPENAI_MODEL` | `gpt-4o-mini` | Default OpenAI model for all pipeline steps |
-| `MAX_SUB_QUERIES` | `4` | Number of sub-queries the planner generates |
+| `OPENAI_MODEL` | `gpt-4o-mini` | Default OpenAI model |
 | `MAX_SEARCH_RESULTS` | `5` | Tavily results per query |
+| `MAX_SCRAPE_URLS` | `5` | Max pages to scrape per run |
+| `MAX_CONTEXT_CHARS` | `50000` | Context truncation limit |
 | `REPORT_FORMAT` | `markdown` | Output format hint passed to the report writer |
 
 <details>
-<summary>Per-step model overrides</summary>
+<summary>Model & embedding overrides</summary>
 
-Override the model used at each pipeline step. If unset, falls back to `OPENAI_MODEL`.
-
-| Variable | Pipeline Step |
-|---|---|
-| `MODEL_CLASSIFY` | Query classification |
-| `MODEL_BRIEF` | Research brief creation |
-| `MODEL_SUPERVISOR` | Supervisor orchestration |
-| `MODEL_RESEARCHER` | Individual researchers |
-| `MODEL_COMPRESS` | Research compression |
-| `MODEL_WRITE_REPORT` | Report writing |
-| `MODEL_REFINE_REPORT` | Report refinement |
+| Variable | Default | Description |
+|---|---|---|
+| `MODEL_WRITE_REPORT` | `OPENAI_MODEL` | Model used for report generation |
+| `EMBEDDING_MODEL` | `text-embedding-3-small` | Embedding model for semantic compression |
+| `CHUNK_SIZE` | `1000` | Characters per chunk for embedding |
+| `CHUNK_OVERLAP` | `100` | Overlap between chunks |
+| `SIMILARITY_THRESHOLD` | `0.75` | Minimum similarity to keep a chunk |
 
 </details>
 
@@ -200,10 +179,11 @@ The script sends a signed A2A `message/send` JSON-RPC request and prints the res
     ]
   }
 }
+```
 
 ## Testing
 
-Unit tests (runs the LangGraph pipeline directly -- requires API keys):
+Unit tests (runs the pipeline directly -- requires API keys):
 
 ```bash
 uv run pytest tests/test_graph.py
@@ -222,5 +202,4 @@ uv run pytest tests/test_client.py
 - [A2A protocol](https://google.github.io/A2A/) -- Agent-to-Agent interoperability spec
 - [Tavily](https://tavily.com/) -- search API for AI agents
 - [Crawl4AI](https://github.com/unclecode/crawl4ai) -- async web scraper with headless browser
-- [LangGraph](https://langchain-ai.github.io/langgraph/) -- graph-based agent orchestration
 - [ActGuard](https://actguard.ai) -- budget control for AI agents

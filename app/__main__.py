@@ -27,12 +27,11 @@ agent_card = AgentCard(
     defaultOutputModes=["text"],
     skills=[
         AgentSkill(
-            id="deep-research",
-            name="Deep Research",
+            id="research",
+            name="Research",
             description=(
-                "Conducts multi-step research on a topic: plans sub-queries, "
-                "searches the web, scrapes and analyzes sources, and writes "
-                "a comprehensive markdown report."
+                "Searches the web, scrapes and compresses sources, and writes "
+                "a markdown research report."
             ),
             tags=["research", "report", "web-search"],
         )
