@@ -158,13 +158,15 @@ curl http://localhost:10000/.well-known/agent.json
 
 ## Invoking the Agent
 
-Edit the query in `scripts/sign_request.py` to set your research topic, then send an HMAC-signed request to the running server:
+Pass your research question as a command-line argument:
 
 ```bash
-uv run python scripts/sign_request.py
+uv run python scripts/sign_request.py "What are the main approaches to quantum error correction?"
 ```
 
-The script sends a signed A2A `message/send` JSON-RPC request and prints the response. A successful response looks like:
+> **Note:** Queries are limited to 400 characters.
+
+The script sends a signed A2A `message/send` JSON-RPC request to the running server and prints the response. A successful response looks like:
 
 ```json
 {
