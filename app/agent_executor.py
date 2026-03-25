@@ -15,8 +15,10 @@ from a2a.types import (
     UnsupportedOperationError,
 )
 
-from app.researcher.errors import BudgetExhaustedError
+# from app.researcher.errors import BudgetExhaustedError
 from app.researcher.graph import run_research
+from actguard.exceptions import BudgetExceededError
+from app.actguard_client import actguard_client
 
 logger = logging.getLogger(__name__)
 
@@ -39,8 +41,13 @@ class ResearchAgentExecutor(AgentExecutor):
         )
 
         try:
-            report = await run_research(query)
-        except BudgetExhaustedError as exc:
+            with actguard_client.run():
+                # cost_limit is in cost units (CU); roughly 1_000 CU ≈ $1.00
+                with actguard_client.budget_guard(cost_limit=500) as b:
+                    report = await run_research(query)
+                
+                print(f"Token used: {b.tokens_used}")  
+        except BudgetExceededError as exc:
             logger.warning("Budget exceeded — task_id=%s: %s", task_id, exc)
             await event_queue.enqueue_event(
                 TaskStatusUpdateEvent(

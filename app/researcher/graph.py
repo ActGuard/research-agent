@@ -9,12 +9,14 @@ import sys
 from datetime import datetime, timezone
 
 from app.config import settings
-from app.researcher.actguard_client import actguard_client
-from app.researcher.errors import BudgetExhaustedError
+# from app.researcher.actguard_client import actguard_client
+# from app.researcher.errors import BudgetExhaustedError
 from app.researcher.prompts import REPORT_SYSTEM, REPORT_USER
 from app.researcher.schemas import TextResponse
 from app.services import llm, scraper, search
 from app.services.embeddings import compress_page_for_query
+
+from app.actguard_client import actguard_client
 
 from actguard.exceptions import BudgetExceededError
 
@@ -133,30 +135,30 @@ async def _generate_report(query: str, context: str) -> str:
 async def run_research(query: str) -> str:
     """Run the full research pipeline: search → scrape → compress → report."""
     try:
-        with actguard_client.run(user_id="research-agent"):
-            with actguard_client.budget_guard(cost_limit=500):
+        # with actguard_client.run(user_id="research-agent"):
+        #     with actguard_client.budget_guard(cost_limit=500):
                 # Step 1: Search
-                results = await _search(query)
+        results = await _search(query)
 
-                if not results:
-                    return f"No search results found for: {query}"
+        if not results:
+            return f"No search results found for: {query}"
 
-                # Step 2: Scrape + compress
-                pages = await _scrape_and_compress(query, results)
+        # Step 2: Scrape + compress
+        pages = await _scrape_and_compress(query, results)
 
-                if not pages:
-                    return f"Could not extract content from search results for: {query}"
+        if not pages:
+            return f"Could not extract content from search results for: {query}"
 
-                # Step 3: Assemble context
-                context = _assemble_context(pages)
+        # Step 3: Assemble context
+        context = _assemble_context(pages)
 
-                # Step 4: Generate report
-                report = await _generate_report(query, context)
+        # Step 4: Generate report
+        report = await _generate_report(query, context)
 
-    except BudgetExceededError as be:
-        msg = f"BUDGET EXCEEDED: Research stopped — the budget limit was reached. {be.details}"
-        print(f"\033[91m{msg}\033[0m", file=sys.stderr)
-        raise BudgetExhaustedError(msg) from None
+    # except BudgetExceededError as be:
+    #     msg = f"BUDGET EXCEEDED: Research stopped — the budget limit was reached. {be.details}"
+    #     print(f"\033[91m{msg}\033[0m", file=sys.stderr)
+    #     raise BudgetExhaustedError(msg) from None
     except Exception as e:
         print(f"\033[91m{e}\033[0m", file=sys.stderr)
         raise
