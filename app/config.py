@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     tavily_api_key: str = ""
     host: str = "localhost"
     port: int = 10000
+    search_country: str = "united states"
     max_search_results: int = 5
     max_scrape_urls: int = 5
     max_context_chars: int = 50_000
@@ -24,7 +25,7 @@ class Settings(BaseSettings):
     embedding_model: str = "text-embedding-3-small"
     chunk_size: int = 1000
     chunk_overlap: int = 100
-    similarity_threshold: float = 0.75
+    similarity_threshold: float = 0.65
 
 
 settings = Settings()

@@ -61,6 +61,7 @@ To enable budget tracking, visit [actguard.ai](https://actguard.ai), create a fr
 | [ActGuard](https://actguard.ai) | Budget control and cost tracking for AI agent operations. |
 | [A2A SDK](https://google.github.io/A2A/) | Agent-to-Agent protocol. Exposes the agent as a JSON-RPC endpoint. |
 | [LangChain OpenAI](https://python.langchain.com/) | OpenAI integration for LLM calls with structured output. |
+| [Streamlit](https://streamlit.io/) | Chat UI for interactive research sessions. |
 
 ## Project Structure
 
@@ -83,6 +84,7 @@ research-agent/
 │       ├── search.py              # Tavily search client
 │       ├── scraper.py             # Crawl4AI web scraper
 │       └── embeddings.py          # Semantic compression via embeddings
+├── chat.py                        # Streamlit chat UI
 ├── scripts/
 │   └── sign_request.py            # Send HMAC-signed A2A requests (testing helper)
 ├── config/
@@ -156,7 +158,17 @@ curl http://localhost:10000/.well-known/agent.json
 
 </details>
 
-## Invoking the Agent
+## Streamlit Chat UI
+
+For a conversational interface, run the Streamlit app directly -- no A2A server needed:
+
+```bash
+uv run streamlit run chat.py
+```
+
+This opens a browser-based chat where you can ask research questions interactively. Use the sidebar to switch between demo users or clear the chat history.
+
+## Invoking the Agent (A2A)
 
 Pass your research question as a command-line argument:
 

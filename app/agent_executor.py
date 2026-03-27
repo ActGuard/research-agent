@@ -17,7 +17,7 @@ from a2a.types import (
 
 # from app.researcher.errors import BudgetExhaustedError
 from app.researcher.graph import run_research
-from actguard.exceptions import BudgetExceededError
+from actguard.exceptions import ActGuardPaymentRequired, BudgetExceededError
 from app.actguard_client import actguard_client
 
 logger = logging.getLogger(__name__)
@@ -41,12 +41,31 @@ class ResearchAgentExecutor(AgentExecutor):
         )
 
         try:
-            with actguard_client.run():
+            with actguard_client.run(user_id="igor-test-stripe-top-up-4") as run:  
                 # cost_limit is in cost units (CU); roughly 1_000 CU ≈ $1.00
                 with actguard_client.budget_guard(cost_limit=500) as b:
                     report = await run_research(query)
                 
                 print(f"Token used: {b.tokens_used}")  
+        except ActGuardPaymentRequired as excp:
+            logger.warning("Actguard payment required — task_id=%s: %s", task_id, excp)
+            print(f"\033[93mCurrent balance: {excp.current_balance}, user_message: {excp.user_message}, top up url: {excp.topup_url}\033[0m")
+            await event_queue.enqueue_event(
+                TaskStatusUpdateEvent(
+                    taskId=task_id,
+                    contextId=context_id,
+                    status=TaskStatus(
+                        state=TaskState.failed,
+                        message=Message(
+                            message_id=str(uuid.uuid4()),
+                            role=Role.agent,
+                            parts=[TextPart(text=str(excp))],
+                        ),
+                    ),
+                    final=True,
+                )
+            )
+            return
         except BudgetExceededError as exc:
             logger.warning("Budget exceeded — task_id=%s: %s", task_id, exc)
             await event_queue.enqueue_event(

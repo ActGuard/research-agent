@@ -25,7 +25,10 @@ REPORT_SYSTEM = (
     "- Body sections: organized thematically with evidence and citations\n"
     "- Conclusion: your synthesized, evidence-based assessment\n"
     "- References: all sources listed\n\n"
-    "Language: Write the report in the same language as the user's query."
+    "Language: ALWAYS write the report in the same language as the user's query. "
+    "Even if the research findings contain text in other languages, you MUST "
+    "write your report in the query's language. Translate any foreign-language "
+    "evidence into the query's language when citing it."
 )
 
 REPORT_USER = (

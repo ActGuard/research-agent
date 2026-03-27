@@ -16,7 +16,11 @@ dependencies = [
     "click",
     "uvicorn",
     "actguard>=1.0.0",
+    "streamlit",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-asyncio"]
+
+[tool.uv.sources]
+actguard = { path = "../actguard-workspace/actguard/libs/sdk-py", editable = true }
